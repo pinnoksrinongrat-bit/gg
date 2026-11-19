@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff5f8">
+  <title>PinkDesk — แดชบอร์ดข้อมูล</title>
+  <style>
+    :root {
+      --ink: #3d2935;
+      --muted: #9c8793;
+      --pink: #e85d91;
+      --pink-dark: #c83d72;
+      --pink-soft: #fff0f5;
+      --pink-pale: #fff8fa;
+      --line: #f1e5eb;
+      --surface: #fff;
+      --green: #4d9b7a;
+      --shadow: 0 12px 32px rgba(106, 52, 76, .07);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: #fff9fb;
+      font: 14px/1.55 "Segoe UI", Tahoma, sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; }
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      width: 252px;
+      padding: 27px 17px 18px;
+      color: #fff;
+      background: linear-gradient(165deg, #ed78a2, #d94f83 75%, #cc467a);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; padding: 0 10px 29px; }
+    .brand-mark {
+      display: grid;
+      width: 39px;
+      height: 39px;
+      place-items: center;
+      border-radius: 13px;
+      color: var(--pink-dark);
+      background: #fff;
+      font-size: 20px;
+      box-shadow: 0 5px 16px #ad2b5b3b;
+    }
+    .brand strong { display: block; font-size: 16px; letter-spacing: .3px; }
+    .brand small { display: block; color: #ffe4ed; font-size: 11px; }
+    .nav-label { padding: 0 12px 9px; color: #ffdeea; font-size: 10px; font-weight: 700; letter-spacing: 1.4px; }
+    .nav { display: grid; gap: 7px; }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 12px 13px;
+      border: 0;
+      border-radius: 11px;
+      color: #ffeaf1;
+      text-align: left;
+      background: transparent;
+      transition: .18s ease;
+    }
+    .nav-btn:hover { background: #ffffff19; }
+    .nav-btn.active { color: #b93669; background: #fff; box-shadow: 0 7px 20px #a7315c30; font-weight: 700; }
+    .nav-icon { width: 21px; text-align: center; font-size: 17px; }
+    .side-note { margin-top: auto; padding: 15px 13px; border: 1px solid #ffffff36; border-radius: 13px; color: #ffeaf1; font-size: 11px; }
+    .side-note strong { display: block; margin-bottom: 4px; color: white; font-size: 12px; }
+    .main { min-height: 100vh; margin-left: 252px; padding: 30px clamp(20px, 4vw, 55px) 50px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 28px; }
+    .eyebrow { margin-bottom: 4px; color: var(--pink-dark); font-size: 11px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(23px, 3vw, 30px); letter-spacing: -.5px; }
+    .subtitle { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .today { display: flex; align-items: center; gap: 8px; padding: 9px 13px; border: 1px solid var(--line); border-radius: 11px; color: #765d69; background: white; white-space: nowrap; }
+    .today span { color: var(--pink); }
+    .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .card { border: 1px solid var(--line); border-radius: 15px; background: var(--surface); box-shadow: var(--shadow); }
+    .kpi { position: relative; overflow: hidden; min-height: 119px; padding: 17px 18px; }
+    .kpi::after { position: absolute; top: -19px; right: -15px; width: 74px; height: 74px; border-radius: 50%; background: var(--pink-soft); content: ""; }
+    .kpi-label { position: relative; z-index: 1; color: var(--muted); font-size: 12px; }
+    .kpi-value { position: relative; z-index: 1; margin-top: 9px; font-size: 26px; font-weight: 750; line-height: 1.15; }
+    .kpi-unit { margin-left: 4px; color: var(--muted); font-size: 12px; font-weight: 500; }
+    .kpi-detail { margin-top: 5px; color: #b298a5; font-size: 11px; }
+    .panel { margin-bottom: 19px; padding: 19px 20px; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .panel-title { margin: 0; font-size: 15px; font-weight: 700; }
+    .panel-hint { color: var(--muted); font-size: 11px; }
+    .filters { display: grid; grid-template-columns: repeat(4, minmax(135px, 1fr)); gap: 12px; }
+    .field { display: grid; gap: 5px; }
+    .field label { color: #846c79; font-size: 11px; font-weight: 650; }
+    .field input, .field select {
+      width: 100%;
+      min-width: 0;
+      height: 39px;
+      padding: 0 11px;
+      border: 1px solid #eee1e8;
+      border-radius: 9px;
+      outline: none;
+      color: var(--ink);
+      background: #fff;
+    }
+    .field input:focus, .field select:focus { border-color: #e98aac; box-shadow: 0 0 0 3px #fbe4ed; }
+    .filter-actions { display: flex; align-items: end; gap: 8px; }
+    .btn { height: 39px; padding: 0 14px; border: 1px solid var(--line); border-radius: 9px; color: #725a67; background: white; font-weight: 650; white-space: nowrap; }
+    .btn:hover { border-color: #e7a0b9; background: var(--pink-pale); }
+    .btn-primary { border-color: var(--pink); color: white; background: var(--pink); }
+    .btn-primary:hover { border-color: var(--pink-dark); background: var(--pink-dark); }
+    .summary-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); gap: 16px; margin-bottom: 19px; }
+    .chart-card { min-height: 227px; padding: 19px 20px; }
+    .chart-list { display: grid; gap: 12px; padding-top: 4px; }
+    .bar-row { display: grid; grid-template-columns: minmax(82px, 116px) 1fr 54px; align-items: center; gap: 9px; }
+    .bar-name { overflow: hidden; color: #775f6c; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-track { height: 9px; overflow: hidden; border-radius: 99px; background: #f8edf1; }
+    .bar-fill { height: 100%; min-width: 2px; border-radius: inherit; background: linear-gradient(90deg, #ee8bad, #dc4d83); transition: width .25s ease; }
+    .bar-value { color: #967f8a; font-size: 10px; text-align: right; }
+    .ring-wrap { display: grid; min-height: 158px; place-items: center; align-content: center; gap: 9px; }
+    .ring {
+      display: grid;
+      width: 118px;
+      height: 118px;
+      place-items: center;
+      border-radius: 50%;
+      background: conic-gradient(var(--pink) var(--progress, 0%), #faedf2 0);
+    }
+    .ring-inner { display: grid; width: 88px; height: 88px; place-items: center; align-content: center; border-radius: 50%; background: white; }
+    .ring-number { font-size: 22px; font-weight: 750; }
+    .ring-label { color: var(--muted); font-size: 10px; }
+    .ring-legend { display: flex; justify-content: center; gap: 15px; color: #806b77; font-size: 10px; }
+    .dot { display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 50%; background: var(--pink); }
+    .dot.pale { background: #f4dce6; }
+    .table-panel { padding: 0; overflow: hidden; }
+    .table-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 20px; border-bottom: 1px solid var(--line); }
+    .table-title { margin: 0; font-size: 15px; }
+    .table-meta { color: var(--muted); font-size: 11px; }
+    .table-wrap { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+    th { padding: 11px 15px; color: #927b87; background: #fffafd; font-size: 10px; font-weight: 700; text-align: left; }
+    td { padding: 12px 15px; border-top: 1px solid #f6edf1; color: #5b4652; font-size: 11px; }
+    tbody tr:hover { background: #fff9fb; }
+    .record-id { color: var(--pink-dark); font-weight: 750; }
+    .badge { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 99px; color: #8d5b6d; background: #fff0f5; font-size: 10px; }
+    .badge.green { color: #36795d; background: #e9f7f0; }
+    .badge.orange { color: #a76b28; background: #fff3e4; }
+    .badge.gray { color: #887a83; background: #f3eff1; }
+    .empty { padding: 38px 15px; color: var(--muted); text-align: center; }
+    .empty strong { display: block; margin-bottom: 4px; color: #735d69; }
+    .footer { padding: 13px 2px; color: #ac99a3; font-size: 10px; text-align: right; }
+    .mobile-brand { display: none; }
+    @media (max-width: 1050px) {
+      .sidebar { width: 216px; }
+      .main { margin-left: 216px; padding-inline: 25px; }
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+      .filters { grid-template-columns: repeat(3, minmax(120px, 1fr)); }
+    }
+    @media (max-width: 700px) {
+      .sidebar { position: sticky; inset: 0 0 auto; width: 100%; height: auto; padding: 10px 12px; }
+      .brand { display: none; }
+      .nav-label, .side-note { display: none; }
+      .nav { grid-template-columns: 1fr 1fr; gap: 7px; }
+      .nav-btn { justify-content: center; padding: 9px 7px; font-size: 12px; }
+      .nav-icon { font-size: 15px; }
+      .main { margin-left: 0; padding: 21px 14px 35px; }
+      .topbar { align-items: flex-start; margin-bottom: 18px; }
+      .today { padding: 7px 9px; font-size: 10px; }
+      .kpis { gap: 9px; margin-bottom: 12px; }
+      .kpi { min-height: 102px; padding: 13px; }
+      .kpi-value { font-size: 21px; }
+      .panel { padding: 15px; }
+      .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .summary-grid { grid-template-columns: 1fr; gap: 12px; }
+      .chart-card { min-height: 195px; padding: 15px; }
+      .table-head { padding: 14px; }
+      th, td { padding-inline: 11px; }
+    }
+    @media (max-width: 390px) {
+      .filters { grid-template-columns: 1fr; }
+      .filter-actions .btn { flex: 1; padding-inline: 8px; }
+      .today { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">✿</div>
+        <div><strong>PinkDesk</strong><small>SMART CAMPUS DASHBOARD</small></div>
+      </div>
+      <div class="nav-label">เมนูหลัก</div>
+      <nav class="nav" aria-label="เมนูหลัก">
+        <button class="nav-btn active" data-view="repairs"><span class="nav-icon">🔧</span> งานซ่อมบำรุง</button>
+        <button class="nav-btn" data-view="waste"><span class="nav-icon">♻️</span> จัดการขยะ</button>
+      </nav>
+      <div class="side-note"><strong>แดชบอร์ดข้อมูล</strong>เลือกหัวข้อเพื่อดูสถิติและกรองรายการตามต้องการ</div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow" id="eyebrow">MAINTENANCE OVERVIEW</div>
+          <h1 id="page-title">งานซ่อมบำรุง</h1>
+          <p class="subtitle" id="page-subtitle">ติดตามสถานะงานซ่อม อุปกรณ์ และความพึงพอใจ</p>
+        </div>
+        <div class="today"><span>●</span> ข้อมูลตัวอย่าง · ก.ย.–พ.ย. 2569</div>
+      </header>
+      <section class="kpis" id="kpis" aria-label="สรุปข้อมูล"></section>
+      <section class="card panel" aria-label="ตัวกรองข้อมูล">
+        <div class="panel-head">
+          <h2 class="panel-title">ตัวกรองข้อมูล</h2>
+          <span class="panel-hint">เลือกได้หลายเงื่อนไขพร้อมกัน</span>
+        </div>
+        <div class="filters" id="filters"></div>
+      </section>
+      <section class="summary-grid">
+        <div class="card chart-card">
+          <div class="panel-head"><h2 class="panel-title" id="chart-title">รายการตามประเภทอุปกรณ์</h2><span class="panel-hint" id="chart-hint">จำนวนรายการ</span></div>
+          <div class="chart-list" id="chart-list"></div>
+        </div>
+        <div class="card chart-card">
+          <div class="panel-head"><h2 class="panel-title" id="ring-title">สถานะงาน</h2><span class="panel-hint">สัดส่วนข้อมูลที่กรอง</span></div>
+          <div class="ring-wrap" id="ring-wrap"></div>
+        </div>
+      </section>
+      <section class="card table-panel">
+        <div class="table-head">
+          <div><h2 class="table-title" id="table-title">รายการแจ้งซ่อม</h2><div class="table-meta" id="table-meta"></div></div>
+          <button class="btn btn-primary" id="export-btn" type="button">ดาวน์โหลด CSV</button>
+        </div>
+        <div class="table-wrap"><table id="data-table"></table></div>
+      </section>
+      <div class="footer">PinkDesk · แสดงเฉพาะรายการที่มีข้อมูลในชุดตัวอย่าง</div>
+    </main>
+  </div>
+  <script>
+    const repairs = [
+      { id:"R001", date:"2026-10-26", department:"บัญชี", equipment:"โปรเจกเตอร์", issue:"ภาพไม่ขึ้น", urgency:"เร่งด่วนมาก", status:"ซ่อมเสร็จ", hours:3.9, parts:0, labor:585, satisfaction:2 },
+      { id:"R002", date:"2026-10-03", department:"บัญชี", equipment:"โน้ตบุ๊ก", issue:"แบตเตอรี่เสื่อม", urgency:"เร่งด่วน", status:"ซ่อมเสร็จ", hours:4.8, parts:900, labor:720, satisfaction:4 },
+      { id:"R003", date:"2026-09-17", department:"ช่างไฟฟ้า", equipment:"เครื่องพิมพ์", issue:"พิมพ์ไม่ชัด", urgency:"เร่งด่วน", status:"รออะไหล่", hours:null, parts:null, labor:null, satisfaction:null },
+      { id:"R004", date:"2026-10-08", department:"สำนักงาน", equipment:"เครื่องพิมพ์", issue:"กระดาษติด", urgency:"ปกติ", status:"ซ่อมเสร็จ", hours:5.7, parts:1500, labor:855, satisfaction:5 },
+      { id:"R005", date:"2026-09-30", department:"บัญชี", equipment:"โน้ตบุ๊ก", issue:"แบตเตอรี่เสื่อม", urgency:"เร่งด่วน", status:"ซ่อมเสร็จ", hours:2.7, parts:2200, labor:405, satisfaction:5 },
+      { id:"R006", date:"2026-09-08", department:"เทคโนโลยีสารสนเทศ", equipment:"คอมพิวเตอร์ตั้งโต๊ะ", issue:"เปิดไม่ติด", urgency:"เร่งด่วน", status:"ซ่อมเสร็จ", hours:1.0, parts:250, labor:150, satisfaction:3 },
+      { id:"R007", date:"2026-10-10", department:"เทคโนโลยีสารสนเทศ", equipment:"โน้ตบุ๊ก", issue:"แบตเตอรี่เสื่อม", urgency:"ปกติ", status:"กำลังซ่อม", hours:null, parts:null, labor:null, satisfaction:null },
+      { id:"R008", date:"2026-10-15", department:"ช่างไฟฟ้า", equipment:"อุปกรณ์เครือข่าย", issue:"สัญญาณหลุด", urgency:"ปกติ", status:"ซ่อมเสร็จ", hours:3.3, parts:0, labor:495, satisfaction:2 },
+      { id:"R009", date:"2026-11-06", department:"ช่างไฟฟ้า", equipment:"เครื่องพิมพ์", issue:"เชื่อมต่อไม่ได้", urgency:"เร่งด่วนมาก", status:"ซ่อมเสร็จ", hours:1.7, parts:250, labor:255, satisfaction:4 },
+      { id:"R010", date:"2026-10-29", department:"ช่างไฟฟ้า", equipment:"อุปกรณ์เครือข่าย", issue:"เปิดไม่ติด", urgency:"ปกติ", status:"รออะไหล่", hours:null, parts:null, labor:null, satisfaction:null }
+    ];
+    const waste = [
+      { id:"W0001",date:"2026-09-01",location:"อาคารเรียน 1",type:"ขยะทั่วไป",weight:34.09,recyclable:0,cost:66.14,price:0,people:206 },
+      { id:"W0002",date:"2026-09-01",location:"อาคารเรียน 2",type:"กระดาษ",weight:43,recyclable:30.32,cost:79.5,price:3,people:194 },
+      { id:"W0003",date:"2026-09-01",location:"โรงอาหาร",type:"ขยะทั่วไป",weight:43.95,recyclable:0,cost:80.93,price:0,people:120 },
+      { id:"W0004",date:"2026-09-01",location:"หอพัก",type:"โลหะ",weight:33.09,recyclable:27.56,cost:64.64,price:20,people:122 },
+      { id:"W0005",date:"2026-09-01",location:"อาคารปฏิบัติการ",type:"กระดาษ",weight:26,recyclable:20.35,cost:54,price:3,people:257 },
+      { id:"W0006",date:"2026-09-02",location:"อาคารเรียน 1",type:"โลหะ",weight:16.02,recyclable:12.83,cost:39.03,price:20,people:107 },
+      { id:"W0007",date:"2026-09-02",location:"อาคารเรียน 2",type:"พลาสติก",weight:42.39,recyclable:20.14,cost:78.59,price:7,people:149 },
+      { id:"W0008",date:"2026-09-02",location:"โรงอาหาร",type:"กระดาษ",weight:79.77,recyclable:56.96,cost:134.66,price:3,people:298 },
+      { id:"W0009",date:"2026-09-02",location:"หอพัก",type:"โลหะ",weight:15.83,recyclable:14.3,cost:38.75,price:20,people:117 },
+      { id:"W0010",date:"2026-09-02",location:"อาคารปฏิบัติการ",type:"กระดาษ",weight:37.25,recyclable:30.17,cost:70.88,price:3,people:206 },
+      { id:"W0011",date:"2026-09-03",location:"อาคารเรียน 1",type:"กระดาษ",weight:19.19,recyclable:16.92,cost:43.79,price:3,people:206 },
+      { id:"W0012",date:"2026-09-03",location:"อาคารเรียน 2",type:"เศษอาหาร",weight:16.22,recyclable:0,cost:39.33,price:0,people:71 },
+      { id:"W0013",date:"2026-09-03",location:"โรงอาหาร",type:"ขยะทั่วไป",weight:45.62,recyclable:0,cost:83.43,price:0,people:153 },
+      { id:"W0014",date:"2026-09-03",location:"หอพัก",type:"กระดาษ",weight:38.86,recyclable:34.8,cost:73.29,price:3,people:271 }
+    ];
+    const state = { view:"repairs", search:"", from:"", to:"", filters:{} };
+    const format = (n, digits=0) => n == null ? "—" : Number(n).toLocaleString("th-TH", { minimumFractionDigits:digits, maximumFractionDigits:digits });
+    const unique = (rows, key) => [...new Set(rows.map(row => row[key]))].sort((a,b) => a.localeCompare(b,"th"));
+    const sum = (rows,key) => rows.reduce((total,row) => total + (Number(row[key]) || 0), 0);
+    const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[char]));
+    const asDate = value => value ? new Date(value + "T00:00:00") : null;
+
+    function filterMarkup() {
+      const isRepair = state.view === "repairs";
+      const filters = isRepair
+        ? [
+            ["department","แผนก",unique(repairs,"department")],
+            ["equipment","ประเภทอุปกรณ์",unique(repairs,"equipment")],
+            ["urgency","ความเร่งด่วน",unique(repairs,"urgency")],
+            ["status","สถานะงาน",unique(repairs,"status")]
+          ]
+        : [
+            ["location","จุดเก็บขยะ",unique(waste,"location")],
+            ["type","ประเภทขยะ",unique(waste,"type")]
+          ];
+      const select = (key,label,options) => `<div class="field"><label for="filter-${key}">${label}</label><select id="filter-${key}" data-filter="${key}"><option value="">ทั้งหมด</option>${options.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("")}</select></div>`;
+      return `<div class="field"><label for="search">ค้นหาข้อมูล</label><input id="search" type="search" placeholder="ค้นหารหัสหรือคำสำคัญ..." value="${escapeHtml(state.search)}"></div>
+        <div class="field"><label for="from">วันที่แจ้งตั้งแต่</label><input id="from" type="date" value="${state.from}"></div>
+        <div class="field"><label for="to">ถึงวันที่</label><input id="to" type="date" value="${state.to}"></div>
+        ${filters.map(item => select(...item)).join("")}
+        ${isRepair ? `<div class="field"><label for="satisfaction">คะแนนพึงพอใจขั้นต่ำ</label><select id="satisfaction" data-filter="satisfaction"><option value="">ทุกคะแนน</option>${[1,2,3,4,5].map(n => `<option value="${n}">${n} คะแนนขึ้นไป</option>`).join("")}</select></div>` : `<div class="field"><label for="recyclable">รีไซเคิลได้</label><select id="recyclable" data-filter="recyclable"><option value="">ทั้งหมด</option><option value="yes">มีวัสดุรีไซเคิล</option><option value="no">ไม่มีวัสดุรีไซเคิล</option></select></div>`}
+        <div class="filter-actions"><button class="btn" id="reset-btn" type="button">ล้างตัวกรอง</button><button class="btn btn-primary" id="apply-btn" type="button">แสดงผล</button></div>`;
+    }
+
+    function currentRows() {
+      const rows = state.view === "repairs" ? repairs : waste;
+      const query = state.search.trim().toLocaleLowerCase("th");
+      return rows.filter(row => {
+        const haystack = Object.values(row).filter(value => value != null).join(" ").toLocaleLowerCase("th");
+        if (query && !haystack.includes(query)) return false;
+        if (state.from && row.date < state.from) return false;
+        if (state.to && row.date > state.to) return false;
+        for (const [key,value] of Object.entries(state.filters)) {
+          if (!value) continue;
+          if (key === "satisfaction" && (row.satisfaction == null || row.satisfaction < Number(value))) return false;
+          else if (key === "recyclable" && (value === "yes" ? row.recyclable <= 0 : row.recyclable > 0)) return false;
+          else if (key !== "satisfaction" && key !== "recyclable" && row[key] !== value) return false;
+        }
+        return true;
+      });
+    }
+
+    function setKpis(rows) {
+      const isRepair = state.view === "repairs";
+      let items;
+      if (isRepair) {
+        const completed = rows.filter(row => row.status === "ซ่อมเสร็จ");
+        const avg = completed.length ? sum(completed,"satisfaction") / completed.length : null;
+        items = [
+          ["รายการทั้งหมด",format(rows.length),"รายการ",`${rows.filter(row => row.status === "ซ่อมเสร็จ").length} รายการซ่อมเสร็จ`],
+          ["กำลังดำเนินการ",format(rows.filter(row => row.status !== "ซ่อมเสร็จ").length),"รายการ","กำลังซ่อมหรือรออะไหล่"],
+          ["เวลาซ่อมเฉลี่ย",format(completed.length ? sum(completed,"hours") / completed.length : null,1),"ชม.","คำนวณจากงานที่ซ่อมเสร็จ"],
+          ["ความพึงพอใจเฉลี่ย",format(avg,1)," / 5","เฉพาะงานที่ซ่อมเสร็จ"]
+        ];
+      } else {
+        const total = sum(rows,"weight"), recycled = sum(rows,"recyclable");
+        items = [
+          ["น้ำหนักขยะรวม",format(total,2),"กก.","จากรายการที่เลือก"],
+          ["รีไซเคิลได้",format(recycled,2),"กก.",`${total ? format(recycled/total*100,1) : 0}% ของน้ำหนักรวม`],
+          ["ค่าจัดเก็บรวม",format(sum(rows,"cost"),2),"บาท","ตามบันทึกการจัดเก็บ"],
+          ["มูลค่ารีไซเคิล",format(rows.reduce((n,row) => n + row.recyclable * row.price,0),2),"บาท","น้ำหนักรีไซเคิล × ราคาต่อกก."]
+        ];
+      }
+      document.getElementById("kpis").innerHTML = items.map(([label,value,unit,detail]) => `<article class="card kpi"><div class="kpi-label">${label}</div><div class="kpi-value">${value}<span class="kpi-unit">${unit}</span></div><div class="kpi-detail">${detail}</div></article>`).join("");
+    }
+
+    function setCharts(rows) {
+      const isRepair = state.view === "repairs";
+      const key = isRepair ? "equipment" : "type";
+      const measure = isRepair ? null : "weight";
+      const grouped = new Map();
+      rows.forEach(row => grouped.set(row[key], (grouped.get(row[key]) || 0) + (measure ? row[measure] : 1)));
+      const entries = [...grouped.entries()].sort((a,b) => b[1]-a[1]);
+      const max = Math.max(1,...entries.map(item => item[1]));
+      document.getElementById("chart-title").textContent = isRepair ? "รายการตามประเภทอุปกรณ์" : "น้ำหนักตามประเภทขยะ";
+      document.getElementById("chart-hint").textContent = isRepair ? "จำนวนรายการ" : "น้ำหนักรวม (กก.)";
+      document.getElementById("ring-title").textContent = isRepair ? "สถานะงาน" : "สัดส่วนรีไซเคิล";
+      document.getElementById("chart-list").innerHTML = entries.length ? entries.map(([name,value]) => `<div class="bar-row"><span class="bar-name" title="${escapeHtml(name)}">${escapeHtml(name)}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.max(2,value/max*100)}%"></div></div><span class="bar-value">${format(value,isRepair ? 0 : 1)}${isRepair ? " งาน" : ""}</span></div>`).join("") : `<div class="empty">ไม่มีข้อมูลสำหรับแสดง</div>`;
+      const total = isRepair ? rows.length : sum(rows,"weight");
+      const part = isRepair ? rows.filter(row => row.status === "ซ่อมเสร็จ").length : sum(rows,"recyclable");
+      const ratio = total ? part/total*100 : 0;
+      document.getElementById("ring-wrap").innerHTML = `<div class="ring" style="--progress:${ratio}%"><div class="ring-inner"><div class="ring-number">${format(ratio,0)}%</div><div class="ring-label">${isRepair ? "ซ่อมเสร็จ" : "รีไซเคิลได้"}</div></div></div><div class="ring-legend"><span><i class="dot"></i>${isRepair ? `${format(part)} งานเสร็จ` : `${format(part,1)} กก. รีไซเคิล`}</span><span><i class="dot pale"></i>${isRepair ? `${format(total-part)} งานอื่น` : `${format(Math.max(0,total-part),1)} กก. อื่น ๆ`}</span></div>`;
+    }
+
+    function renderTable(rows) {
+      const isRepair = state.view === "repairs";
+      const columns = isRepair
+        ? [["id","รหัสงาน"],["date","วันที่แจ้ง"],["department","แผนก"],["equipment","ประเภทอุปกรณ์"],["issue","อาการเสีย"],["urgency","ความเร่งด่วน"],["status","สถานะงาน"],["hours","เวลาซ่อม (ชม.)"],["parts","ค่าอะไหล่ (บาท)"],["labor","ค่าแรง (บาท)"],["satisfaction","พึงพอใจ"]]
+        : [["id","รหัสบันทึก"],["date","วันที่"],["location","จุดเก็บขยะ"],["type","ประเภทขยะ"],["weight","น้ำหนักรวม (กก.)"],["recyclable","รีไซเคิลได้ (กก.)"],["cost","ค่าจัดเก็บ (บาท)"],["price","ราคาขาย/กก. (บาท)"],["people","ผู้ใช้พื้นที่ (คน)"]];
+      document.getElementById("table-title").textContent = isRepair ? "รายการแจ้งซ่อม" : "บันทึกการจัดการขยะ";
+      document.getElementById("table-meta").textContent = `แสดง ${format(rows.length)} จาก ${format(isRepair ? repairs.length : waste.length)} รายการ`;
+      const cell = (row,key) => {
+        let value = row[key];
+        if (key === "status") {
+          const color = value === "ซ่อมเสร็จ" ? "green" : value === "รออะไหล่" ? "orange" : "gray";
+          return `<span class="badge ${color}">${escapeHtml(value)}</span>`;
+        }
+        if (key === "urgency") return `<span class="badge ${value === "เร่งด่วนมาก" ? "orange" : ""}">${escapeHtml(value)}</span>`;
+        if (key === "date") return escapeHtml(value);
+        if (["hours","parts","labor","satisfaction","weight","recyclable","cost","price","people"].includes(key)) return format(value,key === "hours" ? 1 : ["weight","recyclable","cost"].includes(key) ? 2 : 0);
+        return value == null ? "—" : key === "id" ? `<span class="record-id">${escapeHtml(value)}</span>` : escapeHtml(value);
+      };
+      document.getElementById("data-table").innerHTML = `<thead><tr>${columns.map(([,label]) => `<th>${label}</th>`).join("")}</tr></thead><tbody>${rows.length ? rows.map(row => `<tr>${columns.map(([key]) => `<td>${cell(row,key)}</td>`).join("")}</tr>`).join("") : `<tr><td class="empty" colspan="${columns.length}"><strong>ไม่พบรายการที่ตรงกับตัวกรอง</strong>ลองเปลี่ยนเงื่อนไขหรือกดล้างตัวกรอง</td></tr>`}</tbody>`;
+    }
+
+    function render() {
+      const isRepair = state.view === "repairs";
+      document.getElementById("eyebrow").textContent = isRepair ? "MAINTENANCE OVERVIEW" : "WASTE MANAGEMENT OVERVIEW";
+      document.getElementById("page-title").textContent = isRepair ? "งานซ่อมบำรุง" : "จัดการขยะและรีไซเคิล";
+      document.getElementById("page-subtitle").textContent = isRepair ? "ติดตามสถานะงานซ่อม อุปกรณ์ และความพึงพอใจ" : "ติดตามปริมาณขยะ การรีไซเคิล และค่าใช้จ่าย";
+      document.getElementById("filters").innerHTML = filterMarkup();
+      Object.entries(state.filters).forEach(([key,value]) => {
+        const field = document.querySelector(`[data-filter="${key}"]`);
+        if (field) field.value = value;
+      });
+      const rows = currentRows();
+      setKpis(rows);
+      setCharts(rows);
+      renderTable(rows);
+    }
+
+    document.querySelectorAll(".nav-btn").forEach(button => button.addEventListener("click", () => {
+      if (state.view === button.dataset.view) return;
+      state.view = button.dataset.view;
+      state.search = "";
+      state.from = "";
+      state.to = "";
+      state.filters = {};
+      document.querySelectorAll(".nav-btn").forEach(item => item.classList.toggle("active", item === button));
+      render();
+    }));
+    document.getElementById("filters").addEventListener("input", event => {
+      if (event.target.id === "search") { state.search = event.target.value; refreshData(); }
+      if (event.target.id === "from") { state.from = event.target.value; refreshData(); }
+      if (event.target.id === "to") { state.to = event.target.value; refreshData(); }
+      if (event.target.dataset.filter) { state.filters[event.target.dataset.filter] = event.target.value; refreshData(); }
+    });
+    document.getElementById("filters").addEventListener("change", event => {
+      if (event.target.dataset.filter) { state.filters[event.target.dataset.filter] = event.target.value; refreshData(); }
+    });
+    function refreshData() {
+      const rows = currentRows();
+      setKpis(rows);
+      setCharts(rows);
+      renderTable(rows);
+    }
+    document.getElementById("filters").addEventListener("click", event => {
+      if (event.target.id === "reset-btn") {
+        state.search = ""; state.from = ""; state.to = ""; state.filters = {};
+        render();
+      }
+      if (event.target.id === "apply-btn") refreshData();
+    });
+    document.getElementById("export-btn").addEventListener("click", () => {
+      const isRepair = state.view === "repairs";
+      const rows = currentRows();
+      const columns = isRepair
+        ? [["id","รหัสงานซ่อม"],["date","วันที่แจ้ง"],["department","แผนก"],["equipment","ประเภทอุปกรณ์"],["issue","อาการเสีย"],["urgency","ความเร่งด่วน"],["status","สถานะงาน"],["hours","เวลาซ่อม (ชั่วโมง)"],["parts","ค่าอะไหล่ (บาท)"],["labor","ค่าแรง (บาท)"],["satisfaction","ความพึงพอใจ"]]
+        : [["id","รหัสบันทึก"],["date","วันที่"],["location","จุดเก็บขยะ"],["type","ประเภทขยะ"],["weight","น้ำหนักรวม (กก.)"],["recyclable","น้ำหนักรีไซเคิลได้ (กก.)"],["cost","ค่าจัดเก็บ (บาท)"],["price","ราคาขายรีไซเคิลต่อกก. (บาท)"],["people","ผู้ใช้พื้นที่ (คน)"]];
+      const quote = value => `"${String(value == null ? "" : value).replace(/"/g,'""')}"`;
+      const csv = "\uFEFF" + [columns.map(([,label]) => quote(label)).join(","),...rows.map(row => columns.map(([key]) => quote(row[key])).join(","))].join("\r\n");
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+      link.download = isRepair ? "maintenance-records.csv" : "waste-records.csv";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+    render();
+  </script>
+</body>
+</html>
